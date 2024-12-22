@@ -32,12 +32,14 @@ private:
     
     juce::Slider delayKnob;
     juce::Slider feedbackKnob;
+    juce::Slider distortionKnob;
     
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> delayAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> feedbackAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> distortionAttachment;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SVerbAudioProcessorEditor)
-    juce::Slider allPassDelaySlider[4];
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> allPassDelaySliderAttachment[4];
+    juce::Slider allPassDelaySlider[3];
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> allPassDelaySliderAttachment[3];
     
 };

@@ -4,6 +4,8 @@
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
   <MAINGROUP id="cbBWcP" name="SVerb">
     <GROUP id="{B3E9D926-F706-C546-960E-E544BA3F6CE3}" name="Source">
+      <FILE id="bSjDQk" name="Distortion.cpp" compile="1" resource="0" file="Source/Distortion.cpp"/>
+      <FILE id="ivGFn0" name="Distortion.h" compile="0" resource="0" file="Source/Distortion.h"/>
       <FILE id="hPEoLC" name="SVerb.cpp" compile="1" resource="0" file="Source/SVerb.cpp"/>
       <FILE id="R8k3MA" name="SVerb.h" compile="0" resource="0" file="Source/SVerb.h"/>
       <FILE id="U5JBb2" name="PluginProcessor.cpp" compile="1" resource="0"

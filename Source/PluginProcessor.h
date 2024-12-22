@@ -65,7 +65,8 @@ private:
     std::atomic<float> * allPassDelay0;
     std::atomic<float> * allPassDelay1;
     std::atomic<float> * allPassDelay2;
-    std::atomic<float> * allPassDelay3;
+    
+    std::atomic<float> * distortion;
     
     
     

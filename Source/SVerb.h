@@ -8,25 +8,55 @@
   ==============================================================================
 */
 #include <JuceHeader.h>
-
+#include "Distortion.h"
 #pragma once
 class SVerb
 {
 public:
     SVerb();
     void prepare(double sampleRate, int maxDelaySamples);
-    void setParams(float delayTimeMs, float feedback, int allPassDelay0,int allPassDelay1,int allPassDelay2,int allPassDelay3);
-    float process(float input, int channel);
+    void setParams(float delayTimeMs, float feedback, int allPassDelay0,int allPassDelay1,int allPassDelay2);
+    float process(juce::AudioBuffer<float>& buffer, std::atomic<float> * delayTime, std::atomic<float> * feedback, std::atomic<float> * waveshaper);
     
 private:
-    juce::AudioBuffer<float> delayLine;
-    int writeIndex, delaySamples;
-    int allPassDelay[4];
+    juce::AudioBuffer<float> apf0delayLine;
+    juce::AudioBuffer<float> apf1delayLine;
+    juce::AudioBuffer<float> apf2delayLine;
+    
+    int writeIndex0, readIndex0;
+    int writeIndex1, readIndex1;
+    int writeIndex2, readIndex2;
+    
+    juce::AudioBuffer<float> cf3delayLine;
+    juce::AudioBuffer<float> cf4delayLine;
+    juce::AudioBuffer<float> cf5delayLine;
+    juce::AudioBuffer<float> cf6delayLine;
+    
+    juce::dsp::DelayLine<float> line1;
+    juce::dsp::DelayLine<float> line2;
+    juce::dsp::DelayLine<float> line3;
+    
+    juce::dsp::DelayLine<float> line4;
+    juce::dsp::DelayLine<float> line5;
+    juce::dsp::DelayLine<float> line6;
+    juce::dsp::DelayLine<float> line7;
+    
+    int writeIndex3, readIndex3;
+    int writeIndex4, readIndex4;
+    int writeIndex5, readIndex5;
+    int writeIndex6, readIndex6;
+    
+    int allPassDelay[3];
     float feedback;
     double sampleRate;
     
-    juce::Array<juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear>> allPassFilters;
-
+    int apDelay1, apDelay2, apDelay3;
+    int cfDelay1, cfDelay2, cfDelay3, cfDelay4;
+    
+    juce::dsp::DelayLine<float> apf0, apf1, apf2;
+    
+    Distortion distortion;
+    float decay;
 
     
 };

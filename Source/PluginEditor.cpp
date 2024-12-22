@@ -31,14 +31,21 @@ SVerbAudioProcessorEditor::SVerbAudioProcessorEditor (SVerbAudioProcessor& p)
     addAndMakeVisible(feedbackKnob);
     feedbackAttachment.reset(new juce::AudioProcessorValueTreeState::SliderAttachment(audioProcessor.getAPVTS(), "feedback", feedbackKnob));
     
-    for ( int i = 0; i < 4; i ++){
-        allPassDelaySlider[i].setSliderStyle(juce::Slider::RotaryVerticalDrag);
-        allPassDelaySlider[i].setTextBoxStyle(juce::Slider::TextBoxAbove, false, 50, 20);
-        allPassDelaySlider[i].setRange(0,1000,0);
-        allPassDelaySlider[i].setValue(0);
-        addAndMakeVisible(allPassDelaySlider[i]);
-        allPassDelaySliderAttachment[i].reset(new juce::AudioProcessorValueTreeState::SliderAttachment( audioProcessor.getAPVTS(), "allPassDelay" + juce::String(i), allPassDelaySlider[i]));
-    }
+    distortionKnob.setSliderStyle(juce::Slider::RotaryVerticalDrag);
+    distortionKnob.setTextBoxStyle(juce::Slider::TextBoxAbove, false, 50, 20);
+    distortionKnob.setRange(1.0,100.0,0);
+    distortionKnob.setValue(0.0);
+    addAndMakeVisible(distortionKnob);
+    distortionAttachment.reset(new juce::AudioProcessorValueTreeState::SliderAttachment(audioProcessor.getAPVTS(), "distortion", distortionKnob));
+    
+//    for ( int i = 0; i < 3; i ++){
+//        allPassDelaySlider[i].setSliderStyle(juce::Slider::RotaryVerticalDrag);
+//        allPassDelaySlider[i].setTextBoxStyle(juce::Slider::TextBoxAbove, false, 50, 20);
+//        allPassDelaySlider[i].setRange(0,44100,0);
+//        allPassDelaySlider[i].setValue(0);
+//        addAndMakeVisible(allPassDelaySlider[i]);
+//        allPassDelaySliderAttachment[i].reset(new juce::AudioProcessorValueTreeState::SliderAttachment( audioProcessor.getAPVTS(), "allPassDelay" + juce::String(i), allPassDelaySlider[i]));
+//    }
 }
 
 SVerbAudioProcessorEditor::~SVerbAudioProcessorEditor()
@@ -53,18 +60,19 @@ void SVerbAudioProcessorEditor::paint (juce::Graphics& g)
 void SVerbAudioProcessorEditor::resized()
 {
     auto bounds = getLocalBounds();
-    auto topArea = getLocalBounds().removeFromTop(bounds.getHeight()/2);
-    auto leftArea = bounds.removeFromLeft(bounds.getWidth()/2);
+    auto leftArea = bounds.removeFromLeft(bounds.getWidth()/3);
+    auto midArea = bounds.removeFromLeft(bounds.getWidth()/3);
     auto rightArea = bounds;
     
-    for(int i = 0; i < 4; i ++){
-        auto leftTopArea = topArea.withTrimmedLeft(i * topArea.getWidth()/4).withWidth(topArea.getWidth()/4);
-        allPassDelaySlider[i].setBounds(leftTopArea);
-        
-    }
+//    for(int i = 0; i < 3; i ++){
+//        auto leftTopArea = topArea.withTrimmedLeft(i * topArea.getWidth()/3).withWidth(topArea.getWidth()/3);
+//        allPassDelaySlider[i].setBounds(leftTopArea);
+//
+//    }
     
-    delayKnob.setBounds(leftArea.reduced(50));
-    feedbackKnob.setBounds(rightArea.reduced(50));
+    delayKnob.setBounds(leftArea);
+    feedbackKnob.setBounds(midArea);
+    distortionKnob.setBounds(rightArea);
     
     
 }

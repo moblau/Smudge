@@ -27,7 +27,7 @@ SVerbAudioProcessor::SVerbAudioProcessor()
     allPassDelay0 = apvts.getRawParameterValue("allPassDelay0");
     allPassDelay1 = apvts.getRawParameterValue("allPassDelay1");
     allPassDelay2 = apvts.getRawParameterValue("allPassDelay2");
-    allPassDelay3 = apvts.getRawParameterValue("allPassDelay3");
+    distortion = apvts.getRawParameterValue("distortion");
 }
 
 SVerbAudioProcessor::~SVerbAudioProcessor()
@@ -99,7 +99,7 @@ void SVerbAudioProcessor::changeProgramName (int index, const juce::String& newN
 //==============================================================================
 void SVerbAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    SVerb.prepare(sampleRate, sampleRate);
+    SVerb.prepare(sampleRate, samplesPerBlock);
 }
 
 void SVerbAudioProcessor::releaseResources()
@@ -156,18 +156,9 @@ void SVerbAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
     
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        auto* channelData = buffer.getWritePointer(channel);
-        for ( int sample = 0; sample < buffer.getNumSamples(); ++sample)
-        {
-            SVerb.setParams(delayTime->load(), feedback->load(),allPassDelay0->load(),allPassDelay1->load(),allPassDelay2->load(),allPassDelay3->load());
-            float inputSample = channelData[sample];
-            float output = SVerb.process(inputSample, channel);
-            channelData[sample] = output;
-        }
-    }
-    DBG(allPassDelay0->load() << " " << allPassDelay1->load() << " " <<allPassDelay2->load() << " " <<allPassDelay3->load());
+    SVerb.process(buffer,delayTime, feedback, distortion);
+    
+
 }
 
 //==============================================================================
@@ -206,12 +197,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout SVerbAudioProcessor::createP
 {
 
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> parameters;
-    parameters.push_back(std::make_unique<juce::AudioParameterInt>(juce::ParameterID("delay",1),"delay",0,1000,0));
+    parameters.push_back(std::make_unique<juce::AudioParameterInt>(juce::ParameterID("delay",1),"delay",0,2500,0));
     parameters.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID("feedback",1),"feedback",0.0,1.0,0.0));
-    for ( int i = 0; i < 4; i++){
+    for ( int i = 0; i < 3; i++){
         auto paramName = "allPassDelay" + juce::String(i);
-        parameters.push_back(std::make_unique<juce::AudioParameterInt>(juce::ParameterID(paramName,1),paramName,0.0,1000.0,1.0));
+        parameters.push_back(std::make_unique<juce::AudioParameterInt>(juce::ParameterID(paramName,1),paramName,0.0,44100.0,1.0));
     }
+    parameters.push_back(std::make_unique<juce::AudioParameterInt>(juce::ParameterID("distortion",1),"distortion",1,100,0));
     return {parameters.begin(), parameters.end()};
     
 }
