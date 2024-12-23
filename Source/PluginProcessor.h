@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "SVerb.h"
+#include "Filter.h"
 
 //==============================================================================
 /**
@@ -55,6 +56,8 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
     
     juce::AudioProcessorValueTreeState& getAPVTS();
+    
+    void handleMidi(juce::MidiBuffer& midiMessages);
 
 private:
     juce::AudioProcessorValueTreeState::ParameterLayout createParameters();
@@ -68,9 +71,14 @@ private:
     
     std::atomic<float> * distortion;
     
+    juce::dsp::DryWetMixer<float> dryWet;
     
+    int notesOn[4] {-1,-1,-1,-1};
+
     
+    Filter filter;
     juce::AudioProcessorValueTreeState apvts;
+    
     
     SVerb SVerb;
     //==============================================================================

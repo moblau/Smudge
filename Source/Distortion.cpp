@@ -19,7 +19,7 @@ float Distortion::process(float sample, std::atomic<float> * distortion)
 {
     float dist = distortion->load();
     inputGain.setGainLinear(dist);
-    outputGain.setGainLinear(1/dist*100);
+    outputGain.setGainLinear(1/sqrt(dist));
     float output = inputGain.processSample(sample);
     output = waveshaper.processSample(output);
     output = outputGain.processSample(output);

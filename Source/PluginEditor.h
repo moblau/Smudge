@@ -33,10 +33,27 @@ private:
     juce::Slider delayKnob;
     juce::Slider feedbackKnob;
     juce::Slider distortionKnob;
+    juce::Slider highPassKnob;
+    juce::Slider lowPassKnob;
+    juce::Slider dryWetKnob;
+    juce::Slider lowPassQKnob;
+    juce::Slider highPassQKnob;
+    juce::Slider freqGainKnob;
+    juce::Slider freqQKnob;
+    juce::Slider ratioKnob;
     
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> delayAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> feedbackAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> distortionAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> lowPassAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> highPassAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> dryWetAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> lowPassQAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> highPassQAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> freqGainAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> freqQAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ratioAttachment;
+    
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SVerbAudioProcessorEditor)
     juce::Slider allPassDelaySlider[3];

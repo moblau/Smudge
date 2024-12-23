@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="upER8D" name="SVerb" projectType="audioplug" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
+              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
+              pluginCharacteristicsValue="pluginWantsMidiIn">
   <MAINGROUP id="cbBWcP" name="SVerb">
     <GROUP id="{B3E9D926-F706-C546-960E-E544BA3F6CE3}" name="Source">
       <FILE id="bSjDQk" name="Distortion.cpp" compile="1" resource="0" file="Source/Distortion.cpp"/>
@@ -16,6 +17,8 @@
             file="Source/PluginEditor.cpp"/>
       <FILE id="a8PUCa" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
     </GROUP>
+    <FILE id="gJ2s5T" name="Filter.cpp" compile="1" resource="0" file="Source/Filter.cpp"/>
+    <FILE id="CbhzTg" name="Filter.h" compile="0" resource="0" file="Source/Filter.h"/>
   </MAINGROUP>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>

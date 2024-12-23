@@ -19,7 +19,8 @@ SVerbAudioProcessor::SVerbAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       ), apvts(*this, nullptr, "PARAMETERS", createParameters())
+                       ), apvts(*this, nullptr, "PARAMETERS", createParameters()),
+                            filter(apvts)
 #endif
 {
     delayTime = apvts.getRawParameterValue("delay");
@@ -100,6 +101,13 @@ void SVerbAudioProcessor::changeProgramName (int index, const juce::String& newN
 void SVerbAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     SVerb.prepare(sampleRate, samplesPerBlock);
+    juce::dsp::ProcessSpec spec;
+    spec.sampleRate = sampleRate;
+    spec.maximumBlockSize = samplesPerBlock;
+    
+    spec.numChannels = 2;
+    dryWet.prepare(spec);
+    filter.prepare(spec);
 }
 
 void SVerbAudioProcessor::releaseResources()
@@ -155,8 +163,16 @@ void SVerbAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
-    
+    handleMidi(midiMessages);
+    dryWet.pushDrySamples(buffer);
+    dryWet.setWetMixProportion(*apvts.getRawParameterValue("dryWet"));
+    juce::dsp::AudioBlock<float> block(buffer);
+    filter.process(juce::dsp::ProcessContextReplacing<float>(block), notesOn);
     SVerb.process(buffer,delayTime, feedback, distortion);
+    
+    
+    dryWet.mixWetSamples(buffer);
+    
     
 
 }
@@ -204,6 +220,15 @@ juce::AudioProcessorValueTreeState::ParameterLayout SVerbAudioProcessor::createP
         parameters.push_back(std::make_unique<juce::AudioParameterInt>(juce::ParameterID(paramName,1),paramName,0.0,44100.0,1.0));
     }
     parameters.push_back(std::make_unique<juce::AudioParameterInt>(juce::ParameterID("distortion",1),"distortion",1,100,0));
+    parameters.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID("lowPass",1),"lowPass",juce::NormalisableRange<float>(20, 20000, .1, .2),20000));
+    parameters.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID("highPass",1),"highPass",juce::NormalisableRange<float>(20, 20000, .1, .2),20));
+    parameters.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID("dryWet",1),"dryWet",0,1,1));
+    parameters.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID("lowPassQ",1),"lowPassQ",juce::NormalisableRange<float>(1, 25, .1),1));
+    parameters.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID("highPassQ",1),"highPassQ",juce::NormalisableRange<float>(1, 25, .1),1));
+    parameters.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID("freqGain",1),"freqGain",juce::NormalisableRange<float>(1, 12, .1),1));
+    parameters.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID("freqQ",1),"freqQ",juce::NormalisableRange<float>(1, 25, .1),1));
+    parameters.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID("ratio",1),"ratio",juce::NormalisableRange<float>(1, 16, 1),1));
+    
     return {parameters.begin(), parameters.end()};
     
 }
@@ -211,4 +236,34 @@ juce::AudioProcessorValueTreeState::ParameterLayout SVerbAudioProcessor::createP
 juce::AudioProcessorValueTreeState& SVerbAudioProcessor::getAPVTS()
 {
     return apvts;
+}
+
+void SVerbAudioProcessor::handleMidi(juce::MidiBuffer& midiMessages)
+{
+    juce::MidiBuffer::Iterator it(midiMessages);
+    juce::MidiMessage message;
+    int samplePos;
+    
+    while (it.getNextEvent(message,samplePos))
+    {
+        if (message.isNoteOn())
+        {
+            for ( int i = 0; i < 4; i ++){
+                if (notesOn[i] == -1){
+                    notesOn[i] = message.getNoteNumber();
+                    break;
+                }
+            }
+        }
+        if (message.isNoteOff())
+        {
+            for ( int i = 0; i < 4; i ++){
+                if (message.getNoteNumber()==notesOn[i]){
+                    notesOn[i] = -1;
+                    break;
+                }
+            }
+        }
+        
+    }
 }
