@@ -81,14 +81,24 @@ void Filter::process(juce::dsp::ProcessContextReplacing<float> block, int* notes
     else{
         *peak3.state = *juce::dsp::IIR::Coefficients<float>::makePeakFilter(44100, 100, 1, 1);
     }
+    
+    
     lowPass.process(block);
     
     peak0.process(block);
+    
     peak1.process(block);
+    
     peak2.process(block);
+    
     peak3.process(block);
+    
     highPass.process(block);
     
     outputGain.setGainLinear(1/sqrt(freqGain));
+    
     outputGain.process(block);
+    
+    
+    
 }
