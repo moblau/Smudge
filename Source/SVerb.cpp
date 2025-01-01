@@ -10,7 +10,7 @@
 
 #include "SVerb.h"
 
-SVerb::SVerb()
+SVerb::SVerb(juce::AudioProcessorValueTreeState& apvts) : params(apvts)
 {
     
 }
@@ -132,11 +132,16 @@ float SVerb::process(juce::AudioBuffer<float>& buffer, std::atomic<float> * dela
     
     float delayCaptured;
     float feedbackCaptured;
+    int signalOrder;
     for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
     {
         auto* channelData = buffer.getWritePointer(channel);
         for ( int sample = 0; sample < buffer.getNumSamples(); ++sample)
         {
+            signalOrder = *params.getRawParameterValue("signalOrder");
+            if (signalOrder == 1){
+                channelData[sample] = distortion.process(channelData[sample], waveshaper);
+            }
             delayCaptured = delayTime->load();
             feedbackCaptured = feedback->load();
             line1.setDelay(apDelay1+delayCaptured);
@@ -198,7 +203,10 @@ float SVerb::process(juce::AudioBuffer<float>& buffer, std::atomic<float> * dela
             
             
             output = (out1+out2+out3+out4)/4;
-            output = distortion.process(output, waveshaper);
+            if (signalOrder == 0){
+                output = distortion.process(output, waveshaper);
+            }
+            
             channelData[sample] = output;
             //            v_delayed= cf3delayLine.getSample(channel, readIndex3);
             //            out1 = tempOut + a*v_delayed;

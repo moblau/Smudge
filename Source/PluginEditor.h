@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "CustomSliderLookAndFeel.h"
 
 //==============================================================================
 /**
@@ -29,7 +30,7 @@ private:
     // access the processor object that created it.
     SVerbAudioProcessor& audioProcessor;
 
-    
+    juce::Image title, lulubyLogo;
     juce::Slider delayKnob;
     juce::Slider feedbackKnob;
     juce::Slider distortionKnob;
@@ -38,9 +39,14 @@ private:
     juce::Slider dryWetKnob;
     juce::Slider lowPassQKnob;
     juce::Slider highPassQKnob;
-    juce::Slider freqGainKnob;
-    juce::Slider freqQKnob;
-    juce::Slider ratioKnob;
+    juce::ToggleButton signalOrder;
+    
+//    juce::Slider freqGainKnob;
+//    juce::Slider freqQKnob;
+//    juce::Slider ratioKnob;
+    CustomSliderLookAndFeel customSliderLookAndFeel;
+    
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> signalOrderAttachment;
     
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> delayAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> feedbackAttachment;
@@ -50,10 +56,11 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> dryWetAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> lowPassQAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> highPassQAttachment;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> freqGainAttachment;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> freqQAttachment;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ratioAttachment;
+//    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> freqGainAttachment;
+//    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> freqQAttachment;
+//    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ratioAttachment;
     
+    juce::Label decayTimeLabel, spreadLabel, distortionLabel, dryWetLabel, hpLabel, qLabel, freqLabel, lpLabel,  signalOrderLabel;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SVerbAudioProcessorEditor)
     juce::Slider allPassDelaySlider[3];

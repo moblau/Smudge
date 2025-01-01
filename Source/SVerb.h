@@ -14,7 +14,7 @@
 class SVerb
 {
 public:
-    SVerb();
+    SVerb(juce::AudioProcessorValueTreeState& apvts);
     void prepare(double sampleRate, int maxDelaySamples);
     void setParams(float delayTimeMs, float feedback, int allPassDelay0,int allPassDelay1,int allPassDelay2);
     float process(juce::AudioBuffer<float>& buffer, std::atomic<float> * delayTime, std::atomic<float> * feedback, std::atomic<float> * waveshaper);
@@ -55,7 +55,7 @@ private:
     int cfDelay1, cfDelay2, cfDelay3, cfDelay4;
     
     juce::dsp::DelayLine<float> apf0, apf1, apf2;
-    
+    juce::AudioProcessorValueTreeState& params;
     Distortion distortion;
     float decay;
 

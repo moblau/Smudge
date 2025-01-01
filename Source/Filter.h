@@ -20,7 +20,7 @@ public:
     float process(float sample, std::atomic<float> * distortion);
     void prepare(juce::dsp::ProcessSpec spec);
     
-    void process(juce::dsp::ProcessContextReplacing<float> block, int* notesOn );
+    void process(juce::dsp::ProcessContextReplacing<float> block );
     
 private:
     juce::AudioProcessorValueTreeState& params;
@@ -28,8 +28,8 @@ private:
     juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> peak0, peak1, peak2, peak3;
     
     int sampleRate;
-    float mapLogScale(float input, float inputMin, float inputMax, float outputMin, float outputMax);
-    float ramp0, ramp1;
+//    float mapLogScale(float input, float inputMin, float inputMax, float outputMin, float outputMax);
+//    float ramp0, ramp1;
     juce::dsp::Gain<float> outputGain;
     
 };

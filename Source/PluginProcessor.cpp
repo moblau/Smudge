@@ -20,7 +20,7 @@ SVerbAudioProcessor::SVerbAudioProcessor()
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
                        ), apvts(*this, nullptr, "PARAMETERS", createParameters()),
-                            filter(apvts)
+                            filter(apvts), SVerb(apvts)
 #endif
 {
     delayTime = apvts.getRawParameterValue("delay");
@@ -163,11 +163,13 @@ void SVerbAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
-    handleMidi(midiMessages);
+//    handleMidi(midiMessages);
     dryWet.pushDrySamples(buffer);
     dryWet.setWetMixProportion(*apvts.getRawParameterValue("dryWet"));
     juce::dsp::AudioBlock<float> block(buffer);
-    filter.process(juce::dsp::ProcessContextReplacing<float>(block), notesOn);
+    
+    
+    filter.process(juce::dsp::ProcessContextReplacing<float>(block));
     SVerb.process(buffer,delayTime, feedback, distortion);
     
     
@@ -191,15 +193,18 @@ juce::AudioProcessorEditor* SVerbAudioProcessor::createEditor()
 //==============================================================================
 void SVerbAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+    auto state = apvts.copyState();
+    std::unique_ptr<juce::XmlElement> xml (state.createXml());
+    copyXmlToBinary (*xml, destData);
 }
 
 void SVerbAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+    std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+
+    if (xmlState.get() != nullptr)
+        if (xmlState->hasTagName (apvts.state.getType()))
+            apvts.replaceState (juce::ValueTree::fromXml (*xmlState));
 }
 
 //==============================================================================
@@ -228,6 +233,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout SVerbAudioProcessor::createP
     parameters.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID("freqGain",1),"freqGain",juce::NormalisableRange<float>(1, 12, .1),1));
     parameters.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID("freqQ",1),"freqQ",juce::NormalisableRange<float>(1, 25, .1),1));
     parameters.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID("ratio",1),"ratio",juce::NormalisableRange<float>(1, 16, 1),1));
+    parameters.push_back(std::make_unique<juce::AudioParameterInt>(juce::ParameterID("signalOrder",1),"signalOrder",0,1,0));
     
     return {parameters.begin(), parameters.end()};
     
@@ -238,32 +244,32 @@ juce::AudioProcessorValueTreeState& SVerbAudioProcessor::getAPVTS()
     return apvts;
 }
 
-void SVerbAudioProcessor::handleMidi(juce::MidiBuffer& midiMessages)
-{
-    juce::MidiBuffer::Iterator it(midiMessages);
-    juce::MidiMessage message;
-    int samplePos;
-    
-    while (it.getNextEvent(message,samplePos))
-    {
-        if (message.isNoteOn())
-        {
-            for ( int i = 0; i < 4; i ++){
-                if (notesOn[i] == -1){
-                    notesOn[i] = message.getNoteNumber();
-                    break;
-                }
-            }
-        }
-        if (message.isNoteOff())
-        {
-            for ( int i = 0; i < 4; i ++){
-                if (message.getNoteNumber()==notesOn[i]){
-                    notesOn[i] = -1;
-                    break;
-                }
-            }
-        }
-        
-    }
-}
+//void SVerbAudioProcessor::handleMidi(juce::MidiBuffer& midiMessages)
+//{
+//    juce::MidiBuffer::Iterator it(midiMessages);
+//    juce::MidiMessage message;
+//    int samplePos;
+//    
+//    while (it.getNextEvent(message,samplePos))
+//    {
+//        if (message.isNoteOn())
+//        {
+//            for ( int i = 0; i < 4; i ++){
+//                if (notesOn[i] == -1){
+//                    notesOn[i] = message.getNoteNumber();
+//                    break;
+//                }
+//            }
+//        }
+//        if (message.isNoteOff())
+//        {
+//            for ( int i = 0; i < 4; i ++){
+//                if (message.getNoteNumber()==notesOn[i]){
+//                    notesOn[i] = -1;
+//                    break;
+//                }
+//            }
+//        }
+//        
+//    }
+//}

@@ -57,7 +57,7 @@ public:
     
     juce::AudioProcessorValueTreeState& getAPVTS();
     
-    void handleMidi(juce::MidiBuffer& midiMessages);
+//    void handleMidi(juce::MidiBuffer& midiMessages);
 
 private:
     juce::AudioProcessorValueTreeState::ParameterLayout createParameters();
@@ -73,7 +73,7 @@ private:
     
     juce::dsp::DryWetMixer<float> dryWet;
     
-    int notesOn[4] {-1,-1,-1,-1};
+//    int notesOn[4] {-1,-1,-1,-1};
 
     
     Filter filter;
