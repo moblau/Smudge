@@ -10,18 +10,35 @@
 
 #include "Distortion.h"
 
-Distortion::Distortion() : waveshaper{{std::tanh}}
+Distortion::Distortion(juce::AudioProcessorValueTreeState& apvts) : waveshaper{{std::tanh}},
+    oversampling(std::make_unique<juce::dsp::Oversampling<float>>(2, 4, juce::dsp::Oversampling<float>::filterHalfBandPolyphaseIIR)),
+    params(apvts)
 {
-    
 }
 
-float Distortion::process(float sample, std::atomic<float> * distortion)
+void Distortion::prepare(const juce::dsp::ProcessSpec& spec)
 {
-    float dist = distortion->load();
+    oversampling->reset();
+    oversampling->initProcessing(spec.maximumBlockSize);
+}
+
+void Distortion::process(juce::AudioBuffer<float>& buffer)
+{
+    float dist = *params.getRawParameterValue("distortion");
     inputGain.setGainLinear(dist);
     outputGain.setGainLinear(1/sqrt(dist));
-    float output = inputGain.processSample(sample);
-    output = waveshaper.processSample(output);
-    output = outputGain.processSample(output);
-    return output;
+    
+    juce::dsp::AudioBlock<float> block(buffer);
+    auto context = juce::dsp::ProcessContextReplacing<float>(block);
+    inputGain.process(context);
+    auto oversampledBlock = oversampling->processSamplesUp(context.getInputBlock());
+    
+//    auto waveshaperContext = juce::dsp::ProcessContextReplacing<float>(oversampledBlock);
+    waveshaper.process(context);
+    
+    oversampling->processSamplesDown(context.getOutputBlock());
+    outputGain.process(context);
+    
+//    oversampling->processSamplesDown(oversampledBlock);
+
 }

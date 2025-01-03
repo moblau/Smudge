@@ -14,11 +14,15 @@ class Distortion
 {
     
 public:
-    Distortion();
-    float process(float sample, std::atomic<float> * distortion);
+    Distortion(juce::AudioProcessorValueTreeState& apvts);
+    void prepare(const juce::dsp::ProcessSpec& spec);
+    void process(juce::AudioBuffer<float>& buffer);
 private:
     juce::dsp::WaveShaper<float> waveshaper;
     juce::dsp::Gain<float> inputGain, outputGain;
+    std::unique_ptr<juce::dsp::Oversampling<float>> oversampling;
+    juce::AudioProcessorValueTreeState& params;
+
     
 };
 

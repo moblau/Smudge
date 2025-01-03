@@ -171,8 +171,8 @@ void SVerbAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
     
     filter.process(juce::dsp::ProcessContextReplacing<float>(block));
     SVerb.process(buffer,delayTime, feedback, distortion);
-    
-    
+//    
+//    
     dryWet.mixWetSamples(buffer);
     
     

@@ -10,7 +10,7 @@
 
 #include "SVerb.h"
 
-SVerb::SVerb(juce::AudioProcessorValueTreeState& apvts) : params(apvts)
+SVerb::SVerb(juce::AudioProcessorValueTreeState& apvts) : params(apvts), distortion(apvts)
 {
     
 }
@@ -133,28 +133,31 @@ float SVerb::process(juce::AudioBuffer<float>& buffer, std::atomic<float> * dela
     float delayCaptured;
     float feedbackCaptured;
     int signalOrder;
+    signalOrder = *params.getRawParameterValue("signalOrder");
+
     for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
     {
         auto* channelData = buffer.getWritePointer(channel);
+        if (signalOrder == 1){
+            distortion.process(buffer);
+        }
         for ( int sample = 0; sample < buffer.getNumSamples(); ++sample)
         {
-            signalOrder = *params.getRawParameterValue("signalOrder");
-            if (signalOrder == 1){
-                channelData[sample] = distortion.process(channelData[sample], waveshaper);
-            }
+            
             delayCaptured = delayTime->load();
             feedbackCaptured = feedback->load();
+//            float a= feedbackCaptured;
             line1.setDelay(apDelay1+delayCaptured);
             line2.setDelay(apDelay2+delayCaptured*(1+feedbackCaptured));
-            line3.setDelay(apDelay3+delayCaptured*(1+feedbackCaptured*3));
-            line4.setDelay(cfDelay1+delayCaptured*(1+feedbackCaptured*5));
-            line5.setDelay(cfDelay2+delayCaptured*(1+feedbackCaptured*7));
-            line6.setDelay(cfDelay3+delayCaptured*(1+feedbackCaptured*11));
-            line7.setDelay(cfDelay4+delayCaptured*(1+feedbackCaptured*13));
+            line3.setDelay(apDelay3+delayCaptured*(3+feedbackCaptured*3));
+            line4.setDelay(cfDelay1+delayCaptured*(3+feedbackCaptured*5));
+            line5.setDelay(cfDelay2+delayCaptured*(3+feedbackCaptured*7));
+            line6.setDelay(cfDelay3+delayCaptured*(3+feedbackCaptured*11));
+            line7.setDelay(cfDelay4+delayCaptured*(3+feedbackCaptured*13));
             float inputSample = channelData[sample];
             setParams(0, .7, 0, 0, 0);
             
-            float a=.7;
+            float a=.62;
             
 //            readIndex0 = writeIndex0 - apDelay1;
             
@@ -203,100 +206,14 @@ float SVerb::process(juce::AudioBuffer<float>& buffer, std::atomic<float> * dela
             
             
             output = (out1+out2+out3+out4)/4;
-            if (signalOrder == 0){
-                output = distortion.process(output, waveshaper);
-            }
+
             
             channelData[sample] = output;
-            //            v_delayed= cf3delayLine.getSample(channel, readIndex3);
-            //            out1 = tempOut + a*v_delayed;
-            //            writeIndex3 = (writeIndex3+1) % cf3delayLine.getNumSamples();
-            //            cf3delayLine.setSample(channel, writeIndex3, output);
-            
-            
-            //            apf0delayLine.setSample(channel, writeIndex0, new_v);
-            //            writeIndex0 = (writeIndex0+1) % apf0delayLine.getNumSamples();
-//
-//            readIndex1 = writeIndex1 - apDelay2 +1;
-//            if ( readIndex1 < 0){
-//                readIndex1+= apf1delayLine.getNumSamples();
-//            }
-//            float tempOut = output;
-//            v_delayed = apf1delayLine.getSample(channel, writeIndex1);
-//            output = a*output + v_delayed;
-//            new_v = tempOut - a*output;
-//            writeIndex1 = (writeIndex1) % apf1delayLine.getNumSamples();
-//            apf1delayLine.setSample(channel, writeIndex1, new_v);
-//
-//        //
-//        //
-//        //
-//            readIndex2 = writeIndex2 - apDelay3 +1;
-//            if ( readIndex2 < 0){
-//                readIndex2+= apf2delayLine.getNumSamples();
-//            }
-//
-//            tempOut = output;
-//            v_delayed = apf2delayLine.getSample(channel, readIndex2);
-//            output = a*output + v_delayed;
-//            new_v = tempOut - a*output;
-//            writeIndex2 = (writeIndex2+1) % apf2delayLine.getNumSamples();
-//            apf2delayLine.setSample(channel, writeIndex2, new_v);
-//
-//            tempOut = output;
-//            float out1,out2,out3,out4;
-//            a = .773;
-//
-//            readIndex3 = writeIndex3 - cfDelay1 +1;
-//            if ( readIndex3 < 0){
-//                readIndex3+= cf3delayLine.getNumSamples();
-//            }
-//
-//            v_delayed= cf3delayLine.getSample(channel, readIndex3);
-//            out1 = tempOut + a*v_delayed;
-//            writeIndex3 = (writeIndex3+1) % cf3delayLine.getNumSamples();
-//            cf3delayLine.setSample(channel, writeIndex3, output);
-//
-//
-//
-//            a = .802;
-//            readIndex4 = writeIndex4 - cfDelay2 +1;
-//            if ( readIndex4 < 0){
-//                readIndex4+= cf4delayLine.getNumSamples();
-//            }
-//            v_delayed= cf4delayLine.getSample(channel, readIndex4);
-//            out2 = tempOut + a*v_delayed;
-//            writeIndex4 = (writeIndex4+1) % cf4delayLine.getNumSamples();
-//            cf4delayLine.setSample(channel, writeIndex4, output);
-//
-//
-//
-//            a = .753;
-//            readIndex5 = writeIndex5 - cfDelay3 +1;
-//            if ( readIndex5 < 0){
-//                readIndex5+= cf5delayLine.getNumSamples();
-//            }
-//            v_delayed= cf5delayLine.getSample(channel, readIndex5);
-//            out3 = tempOut + a*v_delayed;
-//            writeIndex5 = (writeIndex5+1) % cf5delayLine.getNumSamples();
-//            cf5delayLine.setSample(channel, writeIndex5, output);
-//
-//
-//
-//            a = .773;
-//            readIndex6 = writeIndex6 - cfDelay4 +1;
-//            if ( readIndex6 < 0){
-//                readIndex6+= cf6delayLine.getNumSamples();
-//            }
-//            v_delayed= cf6delayLine.getSample(channel, readIndex6);
-//            out4 = tempOut + a*v_delayed;
-//            writeIndex6 = (writeIndex6+1) % cf6delayLine.getNumSamples();
-//            cf6delayLine.setSample(channel, writeIndex6, output);
-//
 
-//
-//            channelData[sample] = (out1+out2+out3+out4)*.25;
             
+        }
+        if (signalOrder == 0){
+            distortion.process(buffer);
         }
     }
     
